@@ -1,0 +1,169 @@
+<cfinclude template="_header.cfm">
+
+<div class="content">
+	<div class="mainbar" style="margin-left:0px; min-height:300px;">
+		<div class="page-head">
+			<h2 class="pull-left">User Listing</h2>
+        	<div class="clearfix"></div>
+        
+        	<!-- Breadcrumb -->
+        	<div class="bread-crumb">
+          		<a href="index.html"><i class="fa fa-home"></i> Home</a> 
+          
+          		<div class="pull-right">
+          			<cfoutput>#linkTo(text="Logout", action="logout", title="Logout")#</cfoutput>
+          		</div>
+          		<!-- Divider -->
+          		<span class="divider">/</span> 
+          		<a href="#" class="bread-current">User Listing</a>
+        	</div>
+        	<div class="clearfix"></div>
+	    </div>
+
+	    <div class="matter">
+	    	<div class="container">
+	    		<div class="row">
+	    			<div class="col-md-12">
+	    				<div class="widget">
+	    					<div class="widget-head">
+	    						<div class="pull-left">Users</div>
+	    						<div class="widget-icons pull-right">
+		    						<a href="#" class="wminimize"><i class="fa fa-chevron-up"></i></a>
+				                    <a href="#" class="wsettings"><i class="fa fa-wrench"></i></a>  
+				                    <a href="#" class="wclose"><i class="fa fa-times"></i></a>
+				                </div>
+				                <div class="clearfix"></div>
+				            </div>
+				            
+				            <div class="widget-content">
+				            	<div class="padd">
+				            		<!--- content here --->
+				            		<table class="table table-striped table-bordered table-hover">
+                    					<thead>
+                        					<tr>
+                        						<th>Name</th>
+                        						<th>Address</th>
+ 				        						<th>Phone</th>
+                        						<th>Email</th>
+                        						<th>Role</th>
+                        						
+                        						<cfif isdefined("session.userRole") AND session.userRole EQ 1>
+                        							<th>Action</th>
+                        						</cfif>
+                        					</tr>
+                    					</thead>
+                    					<tbody>
+                    						<cfoutput query="users">
+                    							<cfset stateName = model("state").findAll(where="id='#users.userState#'")>	
+                    							
+	                        					<tr>
+	                        						<td>
+	                        							<cfif isdefined("session.userRole") AND session.userRole EQ 1>
+	                        								#linkTo(text="#users.name#", action="edit", title="Edit this user", key="#users.id#")#</td>
+	                        							<cfelseif isdefined("session.userID") AND users.id EQ session.userID>
+	                        								#linkTo(text="#users.name#", action="edit", title="Edit this user", key="#users.id#")#</td>
+	                        							<cfelse>
+	                        								#users.name#
+	                        							</cfif>
+	                        						<td>
+	                        							#users.userAddress#<br />
+	                        							#users.userCity#, #stateName.shortName#, #users.userZip#
+	                        						</td>
+	                        						<td>#users.phoneNumber#</td>
+	                        						<td>#users.email#</td>
+	                        						<td>
+	                        							<cfif users.roleID EQ 1>
+	                        								<span class="label label-success">Administrator</span>
+	                        							<cfelse>
+	                        								<span class="label label-info">Read Only</span>
+	                        							</cfif>
+	                        						</td>
+	                        						
+	                        						<cfif isdefined("session.userRole") AND session.userRole EQ 1>
+		                        						<td>
+		                        							<cfif users.id EQ session.userID>
+		                        								<!--- Do not provide link for user to delete themselves --->
+															<cfelse>
+		                        								#linkTo(text="Delete", action="delete", title="Delete", params="deleteID=#users.id#")#
+		                        							</cfif>
+		                        						</td>
+		                        					</cfif>
+	                        					</tr>
+	                        				</cfoutput>                                                         
+                    					</tbody>
+                    				</table>
+
+
+                    				<!-----------------------------------------
+            						-- Create Modal
+            						------------------------------------------>
+                    				<div id="createModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            							<div class="modal-dialog">
+            					  			<div class="modal-content">
+                                  				<div class="modal-header">
+                                    				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                                    				<h4 class="modal-title">Create User</h4>
+                                  				</div>
+
+                                  				<div class="modal-body">
+                                    			
+                                    				<cfoutput>
+												
+														#startFormTag(action="create", class="form-horizontal")#
+	                                  				
+														#textField(objectName="user", property="name", label="Name", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#textField(objectName="user", property="email", label="Email", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#textField(objectName="user", property="phoneNumber", label="Telephone", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#textArea(objectName="user", property="userAddress", label="Address", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", rows="2", labelPlacement="before")#
+														
+														#textField(objectName="user", property="userCity", label="City", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#select(objectName="user", property="userState", options=states, label="State", includeBlank="-- Please Select One --", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#textField(objectName="user", property="userZip", label="Zip", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#textField(objectName="user", property="username", label="Username", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#passwordField(objectName="user", property="userPassword", label="Password", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+														
+														#select(objectName="user", property="roleID", options=roles, label="Role", includeBlank="-- Please Select One --", class="form-control", prependtolabel="<div class='col-lg-12'>", append="</div>", labelPlacement="before")#
+													</div>
+
+	                              				
+	                                  				<div class="modal-footer">
+					                                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+					                                    #buttonTag(content="Save Changes", type="submit", class="btn btn-primary")#
+	                                  				</div>
+                                  				
+                                  					#endFormTag()#
+
+                                  				</cfoutput>
+                                			</div>
+        								</div>
+            						</div>
+				            	</div>
+
+				            	<div class="widget-foot">
+				            		<!--- footer here --->
+				            		
+				            		<cfif session.userRole EQ "1">
+				            			<a href="#createModal" class="btn btn-success" data-toggle="modal">Create User</a>	
+				            		<cfelse>
+				            			&nbsp;
+				            		</cfif>
+				            		
+				            		<!---<span class="pull-right">Pagination here</span>--->
+				            	</div>
+				            </div>
+				        </div>
+				    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<cfinclude template="_footer.cfm">
